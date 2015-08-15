@@ -13,6 +13,6 @@ public class AndroidLauncher extends AndroidApplication {
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		initialize(new MainActivity(), config);
 
-		System.out.println("SSS");
+		System.out.println("aaaaa");
 	}
 }

@@ -3,12 +3,18 @@ package com.brotherhood.wizards.stages;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.brotherhood.wizards.enums.PlayerType;
 import com.brotherhood.wizards.player.Player;
+import com.brotherhood.wizards.processing.BodyContactProcessor;
+import com.brotherhood.wizards.processing.MouseSwipeProcessor;
 import com.brotherhood.wizards.utils.PhysicWorldUtils;
 
 /**
@@ -16,23 +22,48 @@ import com.brotherhood.wizards.utils.PhysicWorldUtils;
  */
 public class GameStage extends Stage
 {
-    private static final int VIEWPORT_WIDTH = 10;
-    private static final int VIEWPORT_HEIGHT = 20;
+    public static final int VIEWPORT_WIDTH = 10;
+    public static final int VIEWPORT_HEIGHT = 20;
     private final float TIME_STEP = 1 / 300f;
     private float accumulator = 0f;
 
     private OrthographicCamera camera;
     private Box2DDebugRenderer renderer;
 
-    private World world;
-    private Player player1;
-     private Vector3 touchPoint;
+    private MouseSwipeProcessor mouseSwipeProcessor;//przetwarzanie swipów
+    private BodyContactProcessor bodyContactProcessor;
 
+    private World world;
+    private Player player1,
+                   player2;
+    private Vector3 touchPoint;
 
     public GameStage() {
+        mouseSwipeProcessor = new MouseSwipeProcessor()
+        {
+            @Override
+            public void onSwipeXAxis(float wayX) {
+                if(wayX > 0)
+                    player1.jumpRight(wayX);
+                if(wayX < 0)
+                    player1.jumpLeft(wayX);
+
+                super.onSwipeXAxis(wayX);
+            }
+
+            @Override
+            public void onSwipeYAxis(float wayY) {
+                super.onSwipeYAxis(wayY);
+            }
+        };
+
+
         world = PhysicWorldUtils.createWorld();
-        setUpPlayer1();
         renderer = new Box2DDebugRenderer();
+        setUpContactProcessor();
+        createWalls();
+        setUpPlayer1();
+        setUpPlayer2();
         setupCamera();
         setupTouchControlAreas();
     }
@@ -43,6 +74,39 @@ public class GameStage extends Stage
         addActor(player1);
     }
 
+    private void setUpPlayer2()
+    {
+        player2 = new Player(PlayerType.PLAYER_2,world);
+        addActor(player2);
+    }
+
+    public void createWalls() {
+        //left wall
+        BodyDef bodyDefLeft = new BodyDef();
+        bodyDefLeft.position.set(new Vector2(0,0));
+        Body bodyLeft = world.createBody(bodyDefLeft);
+        PolygonShape shapeLeft = new PolygonShape();
+        shapeLeft.setAsBox(0,VIEWPORT_HEIGHT);
+        bodyLeft.createFixture(shapeLeft, 0);
+        shapeLeft.dispose();
+
+        //right wall
+
+        BodyDef bodyDefRight = new BodyDef();
+        bodyDefRight.position.set(new Vector2(VIEWPORT_WIDTH+.01f,0));
+        Body bodyRight = world.createBody(bodyDefRight);
+        PolygonShape shapeRight = new PolygonShape();
+        shapeRight.setAsBox(0,VIEWPORT_HEIGHT);
+        bodyRight.createFixture(shapeRight, 0);
+        shapeRight.dispose();
+    }
+
+
+    private void setUpContactProcessor()
+    {
+        bodyContactProcessor = new BodyContactProcessor();
+        world.setContactListener(bodyContactProcessor);
+    }
     private void setupTouchControlAreas() {
         touchPoint = new Vector3();
         Gdx.input.setInputProcessor(this);
@@ -50,34 +114,21 @@ public class GameStage extends Stage
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-
-        System.out.println(screenX);
-
+        mouseSwipeProcessor.touchDragged(screenX, screenY, pointer);
         return super.touchDragged(screenX, screenY, pointer);
     }
 
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
-
-        // Need to get the actual coordinates
-        translateScreenToWorldCoordinates(x, y);
-        Vector3 touchPos = new Vector3(x,y, 0);
-        camera.unproject(touchPos);
-
-        if(touchPos.x > player1.getBody().getPosition().x)
-        {
-            player1.jumpRight();
-            System.out.println("right");
-        }
-        if(touchPos.x < player1.getBody().getPosition().x)
-        {
-            player1.jumpLeft();
-            System.out.println("left");
-        }
-
+        mouseSwipeProcessor.touchDown(x, y, pointer, button);
         return super.touchDown(x, y, pointer, button);
     }
 
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        mouseSwipeProcessor.touchUp(screenX, screenY, pointer, button);
+        return super.touchUp(screenX, screenY, pointer, button);
+    }
 
     private void setupCamera() {
         camera = new OrthographicCamera(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
@@ -97,8 +148,6 @@ public class GameStage extends Stage
             accumulator -= TIME_STEP;
         }
 
-        //TODO: Implement interpolation
-
     }
 
     @Override
@@ -107,12 +156,4 @@ public class GameStage extends Stage
         renderer.render(world, camera.combined);
     }
 
-    /**
-     * Helper function to get the actual coordinates in my world
-     * @param x
-     * @param y
-     */
-    private void translateScreenToWorldCoordinates(int x, int y) {
-        getCamera().unproject(touchPoint.set(x, y, 0));
-    }
 }

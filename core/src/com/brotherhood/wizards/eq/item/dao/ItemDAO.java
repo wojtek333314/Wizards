@@ -18,7 +18,8 @@ public class ItemDAO {
             type2 =  "type2",
             type2Value = "type2Value",
             type3 = "type3",
-            type3Value = "type3Value";
+            type3Value = "type3Value",
+            count = "count";
 
     public static ItemDTO createItemDTO(String json) throws JSONException {
         ItemDTO itemDTO = new ItemDTO();
@@ -32,6 +33,7 @@ public class ItemDAO {
         itemDTO.setTypeValue(playerObject.getLong(typeValue));
         itemDTO.setType2Value(playerObject.getLong(type2Value));
         itemDTO.setType3Value(playerObject.getLong(type3Value));
+        itemDTO.setCount(playerObject.getInt(count));
 
         return itemDTO;
     }

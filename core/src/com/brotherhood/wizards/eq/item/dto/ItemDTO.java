@@ -10,6 +10,15 @@ public class ItemDTO {
     private String description;
     private ItemType type,type2,type3;
     private double typeValue,type2Value,type3Value;
+    private int count;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public String getName() {
         return name;

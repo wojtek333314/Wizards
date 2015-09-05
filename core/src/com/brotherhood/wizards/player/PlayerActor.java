@@ -86,7 +86,7 @@ public class PlayerActor extends Actor
     {
         impulsePower = (-swipeWayX/ Gdx.graphics.getWidth()) * 2;
         body.setLinearVelocity(0,0);
-        body.applyLinearImpulse(new Vector2(-impulsePower,0),body.getWorldCenter(),true);
+        body.applyLinearImpulse(new Vector2(-impulsePower, 0), body.getWorldCenter(), true);
     }
 
     public float getBodyX() {

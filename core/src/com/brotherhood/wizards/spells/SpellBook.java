@@ -21,8 +21,12 @@ public class SpellBook implements JsonDownloader.JsonDownloaderListener {
     public SpellBook()
     {
         ServiceLoader spellBookLoader = new ServiceLoader(ServiceType.USER_SPELL_BOOK_GET);
-        spellBookLoader.setJsonDownloaderListener(this);
+        spellBookLoader.setJsonDownloaderListener(this,true);
         spellBookLoader.execute();
+    }
+
+    public SpellBook(String jsonCache){
+        parseJsonToSpellList(jsonCache);
     }
 
     private void parseJsonToSpellList(String jsonString)
@@ -40,6 +44,11 @@ public class SpellBook implements JsonDownloader.JsonDownloaderListener {
 
     public List<SpellDTO> getSpellList() {
         return spellList;
+    }
+
+    public SpellDTO getSpell(int index)
+    {
+        return spellList.get(index);
     }
 
     @Override

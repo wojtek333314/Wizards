@@ -21,8 +21,12 @@ public class Equipment implements JsonDownloader.JsonDownloaderListener {
     public Equipment()
     {
         ServiceLoader eqLoader = new ServiceLoader(ServiceType.USER_EQ_GET);
-        eqLoader.setJsonDownloaderListener(this);
+        eqLoader.setJsonDownloaderListener(this,true);
         eqLoader.execute();
+    }
+
+    public Equipment(String cacheJson){
+        parseJsonToItemList(cacheJson);
     }
 
     private void parseJsonToItemList(String json)

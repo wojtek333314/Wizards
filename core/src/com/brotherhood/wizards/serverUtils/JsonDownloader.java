@@ -1,6 +1,7 @@
 package com.brotherhood.wizards.serverUtils;
 
 import com.badlogic.gdx.utils.async.AsyncTask;
+import com.brotherhood.wizards.utils.SharedPreferences;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,10 +18,11 @@ public class JsonDownloader implements AsyncTask {
     private boolean isDownloading = false;
     private String url;
     private JsonDownloaderListener jsonDownloaderListener;
+    private boolean cacheJson;
 
-
-    public void setJsonDownloaderListener(JsonDownloaderListener jsonDownloaderListener) {
+    public void setJsonDownloaderListener(JsonDownloaderListener jsonDownloaderListener,boolean cacheJson) {
         this.jsonDownloaderListener = jsonDownloaderListener;
+        this.cacheJson = cacheJson;
     }
 
     public void setUrl(String url) {
@@ -73,7 +75,12 @@ public class JsonDownloader implements AsyncTask {
             e.printStackTrace();
         }
         if(jsonDownloaderListener!=null)
+        {
+            if(cacheJson)
+                SharedPreferences.putString(ServerConstants.getCacheKeyByUrl(url),jsonDownloaded);
+
             jsonDownloaderListener.onLoadFinished(jsonDownloaded);
+        }
         return jsonDownloaded;
     }
 

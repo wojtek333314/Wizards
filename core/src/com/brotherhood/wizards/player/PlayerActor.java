@@ -8,7 +8,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.brotherhood.wizards.enums.PlayerType;
+import com.brotherhood.wizards.serverUtils.ServerConstants;
 import com.brotherhood.wizards.stages.GameStage;
+import com.brotherhood.wizards.utils.SharedPreferences;
 
 /**
  * Created by Wojtek on 2015-08-25.
@@ -26,12 +28,19 @@ public class PlayerActor extends Actor
     private Body    body;
     private PlayerType playerType;
     private World   worldHandle;
+    private Player playerProperties;
 
     public PlayerActor(PlayerType playerType,World world)
     {
         this.playerType = playerType;
         this.worldHandle = world;
+        loadPlayerFromCache();
         createBody();
+    }
+
+    private void loadPlayerFromCache()
+    {
+        this.playerProperties = new Player(SharedPreferences.getString(ServerConstants.USER_CACHE_KEY));
     }
 
     private void createBody()
@@ -77,14 +86,14 @@ public class PlayerActor extends Actor
 
     public void jumpRight(float swipeWayX)
     {
-        impulsePower = (swipeWayX/Gdx.graphics.getWidth()) * 2;
+        impulsePower = (float) ((swipeWayX/Gdx.graphics.getWidth()) * playerProperties.getSpellBook().getSpell(0).getSpeed());
         body.setLinearVelocity(0,0);
         body.applyLinearImpulse(new Vector2(impulsePower,0),body.getWorldCenter(),true);
     }
 
     public void jumpLeft(float swipeWayX)
     {
-        impulsePower = (-swipeWayX/ Gdx.graphics.getWidth()) * 2;
+        impulsePower = (float) ((-swipeWayX/ Gdx.graphics.getWidth()) * playerProperties.getSpellBook().getSpell(0).getSpeed());
         body.setLinearVelocity(0,0);
         body.applyLinearImpulse(new Vector2(-impulsePower, 0), body.getWorldCenter(), true);
     }

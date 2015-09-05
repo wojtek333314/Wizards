@@ -21,7 +21,6 @@ public class PlayerActor extends Actor
 {
     private float   bodyX,bodyY,
                     bodyWidth,bodyHeight;
-
     private float density;//gestosc body
     private float friction;//tarcie
     private float impulsePower = 9f;//power of move
@@ -29,9 +28,11 @@ public class PlayerActor extends Actor
     private PlayerType playerType;
     private World   worldHandle;
     private Player playerProperties;
+    private String nick;
 
-    public PlayerActor(PlayerType playerType,World world)
+    public PlayerActor(PlayerType playerType,World world,String nick)
     {
+        this.nick = nick;
         this.playerType = playerType;
         this.worldHandle = world;
         loadPlayerFromCache();
@@ -40,7 +41,11 @@ public class PlayerActor extends Actor
 
     private void loadPlayerFromCache()
     {
-        this.playerProperties = new Player(SharedPreferences.getString(ServerConstants.USER_CACHE_KEY));
+        if(playerType==PlayerType.PLAYER_1)
+            this.playerProperties = new Player(SharedPreferences.getString(ServerConstants.USER_CACHE_KEY),nick);
+        else
+        if(playerType==PlayerType.PLAYER_2)
+            this.playerProperties = new Player(nick);
     }
 
     private void createBody()
@@ -86,14 +91,14 @@ public class PlayerActor extends Actor
 
     public void jumpRight(float swipeWayX)
     {
-        impulsePower = (float) ((swipeWayX/Gdx.graphics.getWidth()) * playerProperties.getSpellBook().getSpell(0).getSpeed());
+        impulsePower = (float) ((swipeWayX/Gdx.graphics.getWidth()) * 2);
         body.setLinearVelocity(0,0);
         body.applyLinearImpulse(new Vector2(impulsePower,0),body.getWorldCenter(),true);
     }
 
     public void jumpLeft(float swipeWayX)
     {
-        impulsePower = (float) ((-swipeWayX/ Gdx.graphics.getWidth()) * playerProperties.getSpellBook().getSpell(0).getSpeed());
+        impulsePower = (float) ((-swipeWayX/ Gdx.graphics.getWidth()) * 2f);
         body.setLinearVelocity(0,0);
         body.applyLinearImpulse(new Vector2(-impulsePower, 0), body.getWorldCenter(), true);
     }
@@ -112,5 +117,9 @@ public class PlayerActor extends Actor
 
     public PlayerType getPlayerType() {
         return playerType;
+    }
+
+    public Player getPlayerProperties() {
+        return playerProperties;
     }
 }

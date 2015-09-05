@@ -11,13 +11,14 @@ import com.brotherhood.wizards.stages.GameStage;
 public class GameMultiplayer implements Screen {
     private GameStage stage;
 
-    public GameMultiplayer()
+    public GameMultiplayer(String player,String opponent)
     {
-        stage = new GameStage();
+        stage = new GameStage(player,opponent);
     }
 
-
-
+    public GameStage getStage() {
+        return stage;
+    }
 
     @Override
     public void render(float delta) {

@@ -10,6 +10,7 @@ import org.json.JSONObject;
  */
 public class SpellDAO {
     private static final String
+            id  = "id",
             name = "name",
             desc = "desc",
             mpCost = "mpCost",
@@ -24,6 +25,7 @@ public class SpellDAO {
     {
         JSONObject obj = new JSONObject(json);
         SpellDTO spellDTO = new SpellDTO();
+        spellDTO.setId(obj.getInt(id));
         spellDTO.setName(obj.getString(name));
         spellDTO.setDesc(obj.getString(desc));
         spellDTO.setDamagePoints(obj.getDouble(damagePoints));

@@ -7,18 +7,18 @@ import com.brotherhood.wizards.enums.ServiceType;
  */
 public class ServiceLoader extends JsonDownloader {
 
-    public ServiceLoader(ServiceType serviceType) {
+    public ServiceLoader(ServiceType serviceType,String nick) {
         String url = "";
         switch (serviceType)
         {
             case USER_DETAILS_GET:
-                url = ServerConstants.SERVER_URL+ServerConstants.GET_USER_DETAILS_SERVICE+ServerConstants.TEST_NICK;
+                url = ServerConstants.SERVER_URL+ServerConstants.GET_USER_DETAILS_SERVICE+nick;
                 break;
             case USER_EQ_GET:
-                url = ServerConstants.SERVER_URL+ServerConstants.GET_EQ_SERVICE+ServerConstants.TEST_NICK;
+                url = ServerConstants.SERVER_URL+ServerConstants.GET_EQ_SERVICE+nick;
                 break;
             case USER_SPELL_BOOK_GET:
-                url = ServerConstants.SERVER_URL+ServerConstants.GET_SPELLBOOK_SERVICE+ServerConstants.TEST_NICK;
+                url = ServerConstants.SERVER_URL+ServerConstants.GET_SPELLBOOK_SERVICE+nick;
                 break;
         }
         setUrl(url);

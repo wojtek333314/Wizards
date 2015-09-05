@@ -3,8 +3,10 @@ package com.brotherhood.wizards.eq;
 import com.brotherhood.wizards.enums.ServiceType;
 import com.brotherhood.wizards.eq.item.dao.ItemDAO;
 import com.brotherhood.wizards.eq.item.dto.ItemDTO;
+import com.brotherhood.wizards.player.Player;
 import com.brotherhood.wizards.serverUtils.JsonDownloader;
 import com.brotherhood.wizards.serverUtils.ServiceLoader;
+import com.brotherhood.wizards.utils.SharedPreferences;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,10 +20,10 @@ import java.util.List;
 public class Equipment implements JsonDownloader.JsonDownloaderListener {
     private List<ItemDTO> itemList;
 
-    public Equipment()
+    public Equipment(Player player)
     {
-        ServiceLoader eqLoader = new ServiceLoader(ServiceType.USER_EQ_GET);
-        eqLoader.setJsonDownloaderListener(this,true);
+        ServiceLoader eqLoader = new ServiceLoader(ServiceType.USER_EQ_GET,player.getNick());
+        eqLoader.setJsonDownloaderListener(this,player.getNick().equals(SharedPreferences.getString("userNick")));
         eqLoader.execute();
     }
 

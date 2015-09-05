@@ -10,6 +10,42 @@ public class PlayerDTO {
     private int maxMP;
     private long exp;
     private long gold;
+    private int attackSpellId,
+                attackSpell2Id,
+                defenceSpellId,
+                ultimatumSpellId;
+
+    public int getAttackSpellId() {
+        return attackSpellId;
+    }
+
+    public void setAttackSpellId(int attackSpellId) {
+        this.attackSpellId = attackSpellId;
+    }
+
+    public int getAttackSpell2Id() {
+        return attackSpell2Id;
+    }
+
+    public void setAttackSpell2Id(int attackSpell2Id) {
+        this.attackSpell2Id = attackSpell2Id;
+    }
+
+    public int getDefenceSpellId() {
+        return defenceSpellId;
+    }
+
+    public void setDefenceSpellId(int defenceSpellId) {
+        this.defenceSpellId = defenceSpellId;
+    }
+
+    public int getUltimatumSpellId() {
+        return ultimatumSpellId;
+    }
+
+    public void setUltimatumSpellId(int ultimatumSpellId) {
+        this.ultimatumSpellId = ultimatumSpellId;
+    }
 
     public String getNick() {
         return nick;

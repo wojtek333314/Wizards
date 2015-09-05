@@ -8,6 +8,7 @@ import com.brotherhood.wizards.serverUtils.JsonDownloader;
 import com.brotherhood.wizards.serverUtils.ServerConstants;
 import com.brotherhood.wizards.serverUtils.ServiceLoader;
 import com.brotherhood.wizards.spells.SpellBook;
+import com.brotherhood.wizards.spells.dto.SpellDTO;
 import com.brotherhood.wizards.utils.SharedPreferences;
 
 /**
@@ -21,19 +22,28 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
     private Equipment equipment;
     private SpellBook spellBook;
 
-    public Player()
+    private SpellDTO    attackSpell,
+                        attackSpell2,
+                        defenceSpell,
+                        ultimatumSpell;
+
+    public Player(String nick)
     {
+        setNick(nick);
         downloadAndParseJSONData();
     }
 
     /**
-     * Konstruktor tworzacy player'a z cache.
+     * Konstruktor tworzacy player'a z cache. Wywolywany tylko jesli PlayerActor jest typu PLAYER1 czyli jest to nasz gracz
+     * Cache jest uaktualniany po wejsciu do aplikacji
      */
-    public Player(String cache){
+    public Player(String cache,String nick){
+        setNick(nick);
         isPlayerLoaded = true;
         isEquipmentLoaded = true;
         isSpellBookLoaded = true;
         playerDTO = PlayerDAO.createPlayerDTO(cache);
+        System.out.println("Player created fully from cache!");
         equipment = new Equipment(SharedPreferences.getString(ServerConstants.EQ_CACHE_KEY));
         spellBook = new SpellBook(SharedPreferences.getString(ServerConstants.SPELLBOOK_CACHE_KEY));
     }
@@ -42,13 +52,12 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
     {
         //download and parser PlayerDTO
         System.out.println("Player downloading data...");
-        ServiceLoader detailsLoader =  new ServiceLoader(ServiceType.USER_DETAILS_GET);
+        ServiceLoader detailsLoader =  new ServiceLoader(ServiceType.USER_DETAILS_GET,getNick());
         detailsLoader.setJsonDownloaderListener(new JsonDownloader.JsonDownloaderListener() {
             @Override
             public void onLoadFinished(String json) {
                 playerDTO = PlayerDAO.createPlayerDTO(json);
-                System.out.println("Player created fully from cache!");
-                System.out.println(json);
+                System.out.println("Player created fully from server!");
             }
 
             @Override
@@ -56,11 +65,11 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
 
             }
         }
-        ,true);
+        ,getNick().equals(SharedPreferences.getString("userNick")));
         detailsLoader.execute();
 
 
-        equipment = new Equipment()
+        equipment = new Equipment(this)
         {
             @Override
             public void onLoadFinished(String json) {
@@ -73,7 +82,7 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
             }
         };
 
-        spellBook = new SpellBook()
+        spellBook = new SpellBook(this)
         {
             @Override
             public void onLoadFinished(String json) {
@@ -99,10 +108,32 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
         return spellBook;
     }
 
+    private void loadChosedSpells(){
+        attackSpell = getSpellBook().getSpellById(getPlayerDTO().getAttackSpellId());
+        attackSpell2 = getSpellBook().getSpellById(getPlayerDTO().getAttackSpell2Id());
+        defenceSpell = getSpellBook().getSpellById(getPlayerDTO().getDefenceSpellId());
+        ultimatumSpell = getSpellBook().getSpellById(getPlayerDTO().getUltimatumSpellId());
+    }
+
+    public SpellDTO getAttackSpell() {
+        return attackSpell;
+    }
+
+    public SpellDTO getAttackSpell2() {
+        return attackSpell2;
+    }
+
+    public SpellDTO getDefenceSpell() {
+        return defenceSpell;
+    }
+
+    public SpellDTO getUltimatumSpell() {
+        return ultimatumSpell;
+    }
+
     @Override
     public void onLoadFinished(String json) {
         isPlayerLoaded = true;
-        System.out.println("Player created fully");
     }
 
     @Override

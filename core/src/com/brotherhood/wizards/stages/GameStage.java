@@ -38,7 +38,7 @@ public class GameStage extends Stage
                         player2;
     private Vector3 touchPoint;
 
-    public GameStage() {
+    public GameStage(String playerNick,String opponentNick) {
         mouseSwipeProcessor = new MouseSwipeProcessor()
         {
             @Override
@@ -57,26 +57,25 @@ public class GameStage extends Stage
             }
         };
 
-
         world = PhysicWorldUtils.createWorld();
         renderer = new Box2DDebugRenderer();
         setUpContactProcessor();
         createWalls();
-        setUpPlayer1();
-        setUpPlayer2();
+        setUpPlayer1(playerNick);
+        setUpPlayer2(opponentNick);
         setupCamera();
         setupTouchControlAreas();
     }
 
-    private void setUpPlayer1()
+    private void setUpPlayer1(String playerNick)
     {
-        player1 = new PlayerActor(PlayerType.PLAYER_1,world);
+        player1 = new PlayerActor(PlayerType.PLAYER_1,world,playerNick);
         addActor(player1);
     }
 
-    private void setUpPlayer2()
+    private void setUpPlayer2(String opponentNick)
     {
-        player2 = new PlayerActor(PlayerType.PLAYER_2,world);
+        player2 = new PlayerActor(PlayerType.PLAYER_2,world,opponentNick);
         addActor(player2);
     }
 

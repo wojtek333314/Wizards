@@ -10,14 +10,21 @@ public class MainActivity extends Game
 
 	@Override
 	public void create() {
+		SharedPreferences.putString("userNick","wojtas");
 
-		SharedPreferences.putString("klucz2","haeuas");
-		final Player player = new Player()
+		final Player player = new Player("wojtas")
 		{
 			@Override
 			public void onLoadFinished(String json) {
 				super.onLoadFinished(json);
-				setScreen(new GameMultiplayer());
+				new Player("tester"){
+					@Override
+					public void onLoadFinished(String json) {
+						super.onLoadFinished(json);
+						setScreen(new GameMultiplayer("wojtas", "tester"));
+					}
+				};
+
 			}
 		};
 

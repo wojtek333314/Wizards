@@ -5,6 +5,7 @@ package com.brotherhood.wizards.enums;
  */
 public enum SpellType {
     ATTACK_SPELL,
+    ATTACK2_SPELL,
     DEFENCE_SPELL,
     ULTIMATUM_SPELL;
 }

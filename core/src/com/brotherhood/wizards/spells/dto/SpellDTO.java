@@ -9,6 +9,7 @@ public class SpellDTO {
     private SpellType spellType;
     private String  name;
     private String desc;
+    private int id;
     private int mpCost;
     private int hpCost;
     private double damagePoints;
@@ -18,6 +19,14 @@ public class SpellDTO {
 
     public SpellType getSpellType() {
         return spellType;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setSpellType(SpellType spellType) {

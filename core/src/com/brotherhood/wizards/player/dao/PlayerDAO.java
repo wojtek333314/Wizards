@@ -15,6 +15,11 @@ public class PlayerDAO {
     private static final String maxMP = "maxMP";
     private static final String exp = "exp";
     private static final String gold = "gold";
+    private static final String userProperties = "userProperties",
+                                attackSpell = "attack",
+                                attackSpell2= "attack2",
+                                defenceSpell = "defence",
+                                ultimatumSpell = "ultimatum";
 
     public static PlayerDTO createPlayerDTO(String json) throws JSONException {
         PlayerDTO playerDTO = new PlayerDTO();
@@ -26,6 +31,12 @@ public class PlayerDAO {
         playerDTO.setMaxMP(playerObject.getInt(maxMP));
         playerDTO.setExp(playerObject.getLong(exp));
         playerDTO.setGold(playerObject.getLong(gold));
+
+        JSONObject playerPropertiesObject = playerObject.getJSONObject(userProperties);
+        playerDTO.setAttackSpellId(playerPropertiesObject.getInt(attackSpell));
+        playerDTO.setAttackSpell2Id(playerPropertiesObject.getInt(attackSpell2));
+        playerDTO.setDefenceSpellId(playerPropertiesObject.getInt(defenceSpell));
+        playerDTO.setUltimatumSpellId(playerPropertiesObject.getInt(ultimatumSpell));
 
         return playerDTO;
     }

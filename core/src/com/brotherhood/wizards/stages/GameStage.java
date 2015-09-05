@@ -12,7 +12,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.brotherhood.wizards.enums.PlayerType;
-import com.brotherhood.wizards.player.Player;
+import com.brotherhood.wizards.player.PlayerActor;
 import com.brotherhood.wizards.processing.BodyContactProcessor;
 import com.brotherhood.wizards.processing.MouseSwipeProcessor;
 import com.brotherhood.wizards.utils.PhysicWorldUtils;
@@ -34,8 +34,8 @@ public class GameStage extends Stage
     private BodyContactProcessor bodyContactProcessor;
 
     private World world;
-    private Player player1,
-                   player2;
+    private PlayerActor player1,
+                        player2;
     private Vector3 touchPoint;
 
     public GameStage() {
@@ -70,13 +70,13 @@ public class GameStage extends Stage
 
     private void setUpPlayer1()
     {
-        player1 = new Player(PlayerType.PLAYER_1,world);
+        player1 = new PlayerActor(PlayerType.PLAYER_1,world);
         addActor(player1);
     }
 
     private void setUpPlayer2()
     {
-        player2 = new Player(PlayerType.PLAYER_2,world);
+        player2 = new PlayerActor(PlayerType.PLAYER_2,world);
         addActor(player2);
     }
 

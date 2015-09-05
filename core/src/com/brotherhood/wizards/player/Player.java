@@ -1,108 +1,95 @@
 package com.brotherhood.wizards.player;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.brotherhood.wizards.enums.PlayerType;
-import com.brotherhood.wizards.stages.GameStage;
+import com.brotherhood.wizards.enums.ServiceType;
+import com.brotherhood.wizards.eq.Equipment;
+import com.brotherhood.wizards.player.dao.PlayerDAO;
+import com.brotherhood.wizards.player.dto.PlayerDTO;
+import com.brotherhood.wizards.serverUtils.JsonDownloader;
+import com.brotherhood.wizards.serverUtils.ServiceLoader;
+import com.brotherhood.wizards.spells.SpellBook;
 
 /**
- * Created by Wojtek on 2015-08-25.
+ * Created by Wojciech Osak on 2015-09-04.
  */
-public class Player extends Actor
-{
-    private Body body;
-    private float   bodyX,bodyY,
-                    bodyWidth,bodyHeight;
-    private PlayerType playerType;
-    private World   worldHandle;
-    private float density;//gestosc body
-    private float friction;//tarcie
-    private float impulsePower = 9f;
+public class Player implements ServiceLoader.JsonDownloaderListener{
+    private boolean isPlayerLoaded = false;
+    private boolean isEquipmentLoaded = false;
+    private boolean isSpellBookLoaded = false;
+    private PlayerDTO playerProperties;
+    private Equipment equipment;
+    private SpellBook spellBook;
 
-    private Vector2 impulseJumpRight = new Vector2(impulsePower,0),
-                    impulseJumpLeft = new Vector2(-impulsePower,0);
-
-
-    public Player(PlayerType playerType,World world)
+    public Player()
     {
-        this.playerType = playerType;
-        this.worldHandle = world;
-        createBody();
+        downloadAndParseJSONData();
     }
 
-    private void createBody()
+    private void downloadAndParseJSONData()
     {
-        switch(playerType)
+        //download and parser PlayerDTO
+        System.out.println("Player downloading data...");
+        ServiceLoader detailsLoader =  new ServiceLoader(ServiceType.USER_DETAILS_GET);
+        detailsLoader.setJsonDownloaderListener(new JsonDownloader.JsonDownloaderListener() {
+            @Override
+            public void onLoadFinished(String json) {
+                playerProperties = PlayerDAO.createPlayerDTO(json);
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+        detailsLoader.execute();
+
+
+        equipment = new Equipment()
         {
-            case PLAYER_1:
-                bodyX = 2;
-                bodyY = 0.5f;
-                bodyWidth = 0.5f;
-                bodyHeight = 0.5f;
-                break;
-            case PLAYER_2:
-                bodyWidth = 0.5f;
-                bodyHeight = 0.5f;
-                bodyX = 3;
-                bodyY = GameStage.VIEWPORT_HEIGHT - bodyHeight;
-                break;
-            case OPPONENT_1:
-                    //todo
-                break;
-            case OPPONENT_2:
-                    //todo
-                break;
-        }
-        density = 0.5f;
-        friction = 0.9f;
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(new Vector2(bodyX, bodyY));
+            @Override
+            public void onLoadFinished(String json) {
+                super.onLoadFinished(json);
+                isEquipmentLoaded = true;
+                if(isSpellBookLoaded){
+                    isPlayerLoaded = true;
+                    Player.this.onLoadFinished(null);
+                }
+            }
+        };
 
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(bodyWidth, bodyHeight);
-        Body body = worldHandle.createBody(bodyDef);
-        body.createFixture(shape, density);
-        body.setLinearDamping(friction);
-        body.getFixtureList().get(0).setFriction(friction);
-        body.resetMassData();
-        shape.dispose();
-
-        this.body = body;
+        spellBook = new SpellBook()
+        {
+            @Override
+            public void onLoadFinished(String json) {
+                super.onLoadFinished(json);
+                isSpellBookLoaded = true;
+                if(isEquipmentLoaded){
+                    isPlayerLoaded = true;
+                    Player.this.onLoadFinished(null);
+                }
+            }
+        };
     }
 
-    public void jumpRight(float swipeWayX)
-    {
-        impulsePower = (swipeWayX/Gdx.graphics.getWidth()) * 2;
-        body.setLinearVelocity(0,0);
-        body.applyLinearImpulse(new Vector2(impulsePower,0),body.getWorldCenter(),true);
+    public PlayerDTO getPlayerProperties() {
+        return playerProperties;
     }
 
-    public void jumpLeft(float swipeWayX)
-    {
-        impulsePower = (-swipeWayX/ Gdx.graphics.getWidth()) * 2;
-        body.setLinearVelocity(0,0);
-        body.applyLinearImpulse(new Vector2(-impulsePower,0),body.getWorldCenter(),true);
+    public Equipment getEquipment() {
+        return equipment;
     }
 
-    public float getBodyX() {
-        return bodyX;
+    public SpellBook getSpellBook() {
+        return spellBook;
     }
 
-    public float getBodyY() {
-        return bodyY;
+    @Override
+    public void onLoadFinished(String json) {
+        isPlayerLoaded = true;
+        System.out.println("Player created fully");
     }
 
-    public Body getBody() {
-        return body;
-    }
+    @Override
+    public void onError() {
 
-    public PlayerType getPlayerType() {
-        return playerType;
     }
 }

@@ -1,0 +1,26 @@
+{
+ "nick":"Wojtas",
+ "roundsToPlay":4,
+ "maxHP":100,
+ "maxMP":100,
+ "exp": 10000,
+ "gold": 3000,
+ "equipment":[
+   {
+     "name":"moonStone",
+     "count":2
+   },   
+   {"itemID":10},
+   {"itemID":11},
+   {"itemID":12},
+   {"itemID":13},
+   {"itemID":14}
+ ],
+ "spellBook":[
+   {"spellID":50},
+   {"spellID":51},
+   {"spellID":52},
+   {"spellID":53},
+   {"spellID":54}
+ ]
+}

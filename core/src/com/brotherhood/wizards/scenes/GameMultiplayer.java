@@ -16,10 +16,6 @@ public class GameMultiplayer implements Screen {
         stage = new GameStage(player,opponent);
     }
 
-    public GameStage getStage() {
-        return stage;
-    }
-
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

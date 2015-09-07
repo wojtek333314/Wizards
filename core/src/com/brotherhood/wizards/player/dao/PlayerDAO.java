@@ -21,6 +21,14 @@ public class PlayerDAO {
                                 defenceSpell = "defence",
                                 ultimatumSpell = "ultimatum";
 
+
+    /**
+     * UWAGA UWAGA UWAGA UWAGA UWAGA UWAGA UWAGA UWAGA UWAGA UWAGA
+     * Wszelkie dodanie wartosci
+     * do tego obiektu nalezy
+     * uwzglednic w klasie
+     * Player w metodzie copyVariablesFromPlayerDTO
+     */
     public static PlayerDTO createPlayerDTO(String json) throws JSONException {
         PlayerDTO playerDTO = new PlayerDTO();
         JSONObject playerObject = new JSONObject(json);
@@ -40,4 +48,5 @@ public class PlayerDAO {
 
         return playerDTO;
     }
+
 }

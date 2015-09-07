@@ -5,20 +5,17 @@ import com.brotherhood.wizards.eq.Equipment;
 import com.brotherhood.wizards.player.dao.PlayerDAO;
 import com.brotherhood.wizards.player.dto.PlayerDTO;
 import com.brotherhood.wizards.serverUtils.JsonDownloader;
-import com.brotherhood.wizards.serverUtils.ServerConstants;
 import com.brotherhood.wizards.serverUtils.ServiceLoader;
 import com.brotherhood.wizards.spells.SpellBook;
 import com.brotherhood.wizards.spells.dto.SpellDTO;
-import com.brotherhood.wizards.utils.SharedPreferences;
 
 /**
  * Created by Wojciech Osak on 2015-09-04.
  */
 public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderListener{
-    private boolean isPlayerLoaded = false;
     private boolean isEquipmentLoaded = false;
     private boolean isSpellBookLoaded = false;
-    private PlayerDTO playerDTO;
+    private boolean isUserDetailsLoaded = false;
     private Equipment equipment;
     private SpellBook spellBook;
 
@@ -34,38 +31,26 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
     }
 
     /**
-     * Konstruktor tworzacy player'a z cache. Wywolywany tylko jesli PlayerActor jest typu PLAYER1 czyli jest to nasz gracz
-     * Cache jest uaktualniany po wejsciu do aplikacji
+     * Startuje trzy watki pobierajace: dane o uzytkowniku, dane o ekwipunku, dane o czarach uzytkownika.
+     * Zapisuje je do cache jesli nick uzytkownika jest nickiem zapisanym w sharedPreferences pod kluczem
+     * userNick.
      */
-    public Player(String cache,String nick){
-        setNick(nick);
-        isPlayerLoaded = true;
-        isEquipmentLoaded = true;
-        isSpellBookLoaded = true;
-        playerDTO = PlayerDAO.createPlayerDTO(cache);
-        System.out.println("Player created fully from cache!");
-        equipment = new Equipment(SharedPreferences.getString(ServerConstants.EQ_CACHE_KEY));
-        spellBook = new SpellBook(SharedPreferences.getString(ServerConstants.SPELLBOOK_CACHE_KEY));
-    }
-
     private void downloadAndParseJSONData()
     {
-        //download and parser PlayerDTO
+        //download and parse PlayerDTO
         System.out.println("Player downloading data...");
         ServiceLoader detailsLoader =  new ServiceLoader(ServiceType.USER_DETAILS_GET,getNick());
         detailsLoader.setJsonDownloaderListener(new JsonDownloader.JsonDownloaderListener() {
             @Override
             public void onLoadFinished(String json) {
-                playerDTO = PlayerDAO.createPlayerDTO(json);
-                System.out.println("Player created fully from server!");
+                copyVariablesFromPlayerDTO(PlayerDAO.createPlayerDTO(json));
+                isUserDetailsLoaded = true;
+                checkIsPlayerFullyLoaded();
             }
 
             @Override
-            public void onError() {
-
-            }
-        }
-        ,getNick().equals(SharedPreferences.getString("userNick")));
+            public void onError() {}
+        });
         detailsLoader.execute();
 
 
@@ -75,10 +60,7 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
             public void onLoadFinished(String json) {
                 super.onLoadFinished(json);
                 isEquipmentLoaded = true;
-                if(isSpellBookLoaded){
-                    isPlayerLoaded = true;
-                    Player.this.onLoadFinished(null);
-                }
+                checkIsPlayerFullyLoaded();
             }
         };
 
@@ -88,16 +70,18 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
             public void onLoadFinished(String json) {
                 super.onLoadFinished(json);
                 isSpellBookLoaded = true;
-                if(isEquipmentLoaded){
-                    isPlayerLoaded = true;
-                    Player.this.onLoadFinished(null);
-                }
+                checkIsPlayerFullyLoaded();
             }
         };
     }
 
-    public PlayerDTO getPlayerDTO() {
-        return playerDTO;
+    private void checkIsPlayerFullyLoaded(){
+        if(isUserDetailsLoaded && isSpellBookLoaded && isEquipmentLoaded)
+        {
+            System.out.println("player fully loaded");
+            this.onLoadFinished(null);
+        }
+
     }
 
     public Equipment getEquipment() {
@@ -108,11 +92,29 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
         return spellBook;
     }
 
-    private void loadChosedSpells(){
-        attackSpell = getSpellBook().getSpellById(getPlayerDTO().getAttackSpellId());
-        attackSpell2 = getSpellBook().getSpellById(getPlayerDTO().getAttackSpell2Id());
-        defenceSpell = getSpellBook().getSpellById(getPlayerDTO().getDefenceSpellId());
-        ultimatumSpell = getSpellBook().getSpellById(getPlayerDTO().getUltimatumSpellId());
+    public void setSpellBook(SpellBook spellBook) {
+        this.spellBook = spellBook;
+    }
+
+    public void loadChosedSpells(){
+        attackSpell = getSpellBook().getSpellById(getAttackSpellId());
+        attackSpell2 = getSpellBook().getSpellById(getAttackSpell2Id());
+        defenceSpell = getSpellBook().getSpellById(getDefenceSpellId());
+        ultimatumSpell = getSpellBook().getSpellById(getUltimatumSpellId());
+    }
+
+    private void copyVariablesFromPlayerDTO(PlayerDTO playerDTO){
+        setNick(playerDTO.getNick());
+        setRoundsToPlay(playerDTO.getRoundsToPlay());
+        setMaxHP(playerDTO.getMaxHP());
+        setMaxMP(playerDTO.getMaxMP());
+        setExp(playerDTO.getExp());
+        setGold(playerDTO.getGold());
+
+        setAttackSpellId(playerDTO.getAttackSpellId());
+        setAttackSpell2Id(playerDTO.getAttackSpell2Id());
+        setDefenceSpellId(playerDTO.getDefenceSpellId());
+        setUltimatumSpellId(playerDTO.getUltimatumSpellId());
     }
 
     public SpellDTO getAttackSpell() {
@@ -133,7 +135,7 @@ public class Player extends PlayerDTO implements ServiceLoader.JsonDownloaderLis
 
     @Override
     public void onLoadFinished(String json) {
-        isPlayerLoaded = true;
+        loadChosedSpells();
     }
 
     @Override

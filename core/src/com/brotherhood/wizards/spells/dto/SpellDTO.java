@@ -81,8 +81,8 @@ public class SpellDTO {
         this.defencePoints = defencePoints;
     }
 
-    public double getSpeed() {
-        return speed;
+    public float getSpeed() {
+        return (float) speed;
     }
 
     public void setSpeed(double speed) {

@@ -8,9 +8,8 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.brotherhood.wizards.enums.PlayerType;
-import com.brotherhood.wizards.serverUtils.ServerConstants;
+import com.brotherhood.wizards.spells.SpellActor;
 import com.brotherhood.wizards.stages.GameStage;
-import com.brotherhood.wizards.utils.SharedPreferences;
 
 /**
  * Created by Wojtek on 2015-08-25.
@@ -19,8 +18,7 @@ import com.brotherhood.wizards.utils.SharedPreferences;
  */
 public class PlayerActor extends Actor
 {
-    private float   bodyX,bodyY,
-                    bodyWidth,bodyHeight;
+    private float bodyWidth,bodyHeight;
     private float density;//gestosc body
     private float friction;//tarcie
     private float impulsePower = 9f;//power of move
@@ -35,21 +33,13 @@ public class PlayerActor extends Actor
         this.nick = nick;
         this.playerType = playerType;
         this.worldHandle = world;
-        loadPlayerFromCache();
+        this.playerProperties = new Player(nick);
         createBody();
-    }
-
-    private void loadPlayerFromCache()
-    {
-        if(playerType==PlayerType.PLAYER_1)
-            this.playerProperties = new Player(SharedPreferences.getString(ServerConstants.USER_CACHE_KEY),nick);
-        else
-        if(playerType==PlayerType.PLAYER_2)
-            this.playerProperties = new Player(nick);
     }
 
     private void createBody()
     {
+        float bodyX = 0,bodyY = 0;
         switch(playerType)
         {
             case PLAYER_1:
@@ -91,28 +81,34 @@ public class PlayerActor extends Actor
 
     public void jumpRight(float swipeWayX)
     {
-        impulsePower = (float) ((swipeWayX/Gdx.graphics.getWidth()) * 2);
+        impulsePower = ((swipeWayX/Gdx.graphics.getWidth()) * 2);
         body.setLinearVelocity(0,0);
-        body.applyLinearImpulse(new Vector2(impulsePower,0),body.getWorldCenter(),true);
+        body.applyLinearImpulse(new Vector2(impulsePower, 0), body.getWorldCenter(), true);
     }
 
     public void jumpLeft(float swipeWayX)
     {
-        impulsePower = (float) ((-swipeWayX/ Gdx.graphics.getWidth()) * 2f);
+        impulsePower = ((-swipeWayX/ Gdx.graphics.getWidth()) * 2f);
         body.setLinearVelocity(0,0);
         body.applyLinearImpulse(new Vector2(-impulsePower, 0), body.getWorldCenter(), true);
     }
 
-    public float getBodyX() {
-        return bodyX;
-    }
-
-    public float getBodyY() {
-        return bodyY;
+    public void simpleAttack(){
+        System.out.println(playerProperties);
+        System.out.println(playerProperties.getSpellBook());
+        new SpellActor(playerProperties.getAttackSpell(),worldHandle).use(this);
     }
 
     public Body getBody() {
         return body;
+    }
+
+    public float getBodyHeight() {
+        return bodyHeight;
+    }
+
+    public float getBodyWidth() {
+        return bodyWidth;
     }
 
     public PlayerType getPlayerType() {

@@ -1,7 +1,6 @@
 package com.brotherhood.wizards.serverUtils;
 
 import com.badlogic.gdx.utils.async.AsyncTask;
-import com.brotherhood.wizards.utils.SharedPreferences;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,17 +11,16 @@ import java.net.URL;
 
 /**
  * Created by Wojciech Osak on 2015-09-05.
+ * Pozwala na pobranie danych z serwera asynchronicznie
  */
 public class JsonDownloader implements AsyncTask {
-    private String jsonDownloaded;
     private boolean isDownloading = false;
+    private String jsonDownloaded;
     private String url;
     private JsonDownloaderListener jsonDownloaderListener;
-    private boolean cacheJson;
 
-    public void setJsonDownloaderListener(JsonDownloaderListener jsonDownloaderListener,boolean cacheJson) {
+    public void setJsonDownloaderListener(JsonDownloaderListener jsonDownloaderListener) {
         this.jsonDownloaderListener = jsonDownloaderListener;
-        this.cacheJson = cacheJson;
     }
 
     public void setUrl(String url) {
@@ -41,6 +39,11 @@ public class JsonDownloader implements AsyncTask {
         return url;
     }
 
+    /**
+     * Odpowiednik .execute() z Androidowego AsyncTask'a
+     * @return
+     * @throws Exception
+     */
     @Override
     public String call() throws Exception {
         isDownloading = true;
@@ -64,7 +67,7 @@ public class JsonDownloader implements AsyncTask {
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = br.readLine()) != null) {
-                        sb.append(line+"\n");
+                        sb.append(line).append("\n");
                     }
                     br.close();
                     jsonDownloaded = sb.toString();
@@ -75,15 +78,14 @@ public class JsonDownloader implements AsyncTask {
             e.printStackTrace();
         }
         if(jsonDownloaderListener!=null)
-        {
-            if(cacheJson)
-                SharedPreferences.putString(ServerConstants.getCacheKeyByUrl(url),jsonDownloaded);
-
             jsonDownloaderListener.onLoadFinished(jsonDownloaded);
-        }
+
         return jsonDownloaded;
     }
 
+    /**
+     * Dla klasy JsonDownloader, po wczytaniu danych uruchamiany jest onLoadFinished() z pobranymi danymi jako argument
+     */
     public interface JsonDownloaderListener{
         void onLoadFinished(String json);
         void onError();

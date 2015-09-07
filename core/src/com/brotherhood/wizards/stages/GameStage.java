@@ -3,19 +3,22 @@ package com.brotherhood.wizards.stages;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.brotherhood.wizards.enums.PlayerType;
 import com.brotherhood.wizards.player.PlayerActor;
 import com.brotherhood.wizards.processing.BodyContactProcessor;
 import com.brotherhood.wizards.processing.GestureProcessor;
-import com.brotherhood.wizards.utils.PhysicWorldUtils;
+import com.brotherhood.wizards.utils.BodyData;
 
 /**
  * Created by Wojtek on 2015-08-25.
@@ -37,13 +40,32 @@ public class GameStage extends Stage
     private World world;
     private PlayerActor player1;
     private PlayerActor player2;
+    private SpriteBatch stageBatch;
 
     public GameStage(String playerNick,String opponentNick) {
+        setUpGestureProcessor();
+        world = new World(new Vector2(0,0), true);
+        renderer = new Box2DDebugRenderer();
+
+        createWalls();
+        setUpPlayer1(playerNick);
+        setUpPlayer2(opponentNick);
+        setupCamera();
+        setUpContactProcessor();
+        shapeRenderer = new ShapeRenderer();
+        stageBatch = new SpriteBatch();
+    }
+
+    /** Obsluga dotyku i gestow dla sceny */
+
+    private void setUpGestureProcessor(){
+        Gdx.input.setInputProcessor(this);
         gestureProcessor = new GestureProcessor();
         gestureProcessor.setGestureListener(new GestureProcessor.GestureListener() {
             @Override
             public void onSimpleAttackGesture() {
                 System.out.println("simpleAttackGesture");
+                player1.simpleAttack();
             }
 
             @Override
@@ -75,16 +97,6 @@ public class GameStage extends Stage
             }
 
         });
-
-        world = PhysicWorldUtils.createWorld();
-        renderer = new Box2DDebugRenderer();
-        setUpContactProcessor();
-        createWalls();
-        setUpPlayer1(playerNick);
-        setUpPlayer2(opponentNick);
-        setupCamera();
-        setupTouchControlAreas();
-        shapeRenderer = new ShapeRenderer();
     }
 
     private void setUpPlayer1(String playerNick)
@@ -126,10 +138,6 @@ public class GameStage extends Stage
         world.setContactListener(bodyContactProcessor);
     }
 
-    private void setupTouchControlAreas() {
-        Gdx.input.setInputProcessor(this);
-    }
-
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         gestureProcessor.touchDragged(screenX, screenY, pointer);
@@ -167,20 +175,21 @@ public class GameStage extends Stage
     @Override
     public void draw() {
         super.draw();
-        /**
-         *             if (gestureProcessor.isUnTouched())
-         for (int i = 0; i < gestureProcessor.getMovementPath().size(); i ++) {
-         shapeRenderer.setProjectionMatrix(camera.combined);
-         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-         shapeRenderer.setColor(1, 1, 0, 1);
-         Vector3 startPoint = camera.unproject(new Vector3((float) gestureProcessor.getMovementPath().get(i).x,
-         (float) gestureProcessor.getMovementPath().get(i).y, 0));
-         Vector3 endPoint = camera.unproject(new Vector3((float) gestureProcessor.getMovementPath().get(i + 1).x,
-         (float) gestureProcessor.getMovementPath().get(i + 1).y, 0));
-         shapeRenderer.line(startPoint.x, startPoint.y, 0, endPoint.x, endPoint.y, 0);
-         shapeRenderer.end();
-         }
-         */
+        Array<Body> bodies = new Array<Body>();
+        world.getBodies(bodies);
+        stageBatch.begin();
+        for(int i=0;i<bodies.size;i++){
+            if((bodies.get(i).getUserData())!=null && ((BodyData) bodies.get(i).getUserData()).getSprite()!=null){
+                Vector3 positionBodyPixels = camera.project(new Vector3(
+                            bodies.get(i).getPosition().x,
+                            bodies.get(i).getPosition().y,
+                            0
+                ));
+                ((BodyData) bodies.get(i).getUserData()).getSprite().setPosition(positionBodyPixels.x,positionBodyPixels.y);
+                ((BodyData) bodies.get(i).getUserData()).getSprite().draw(stageBatch);
+            }
+        }
+        stageBatch.end();
         renderer.render(world, camera.combined);
     }
 }

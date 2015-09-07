@@ -6,7 +6,6 @@ import com.brotherhood.wizards.eq.item.dto.ItemDTO;
 import com.brotherhood.wizards.player.Player;
 import com.brotherhood.wizards.serverUtils.JsonDownloader;
 import com.brotherhood.wizards.serverUtils.ServiceLoader;
-import com.brotherhood.wizards.utils.SharedPreferences;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,7 +22,7 @@ public class Equipment implements JsonDownloader.JsonDownloaderListener {
     public Equipment(Player player)
     {
         ServiceLoader eqLoader = new ServiceLoader(ServiceType.USER_EQ_GET,player.getNick());
-        eqLoader.setJsonDownloaderListener(this,player.getNick().equals(SharedPreferences.getString("userNick")));
+        eqLoader.setJsonDownloaderListener(this);
         eqLoader.execute();
     }
 

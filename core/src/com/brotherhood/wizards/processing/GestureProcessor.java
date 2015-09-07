@@ -20,7 +20,6 @@ public class GestureProcessor implements InputProcessor {
     private GestureDirection verticalDirection,//pionowy kierunek
                              horizontalDirection;//poziomy kierunek
     private List<Point>     movementPath = new ArrayList<Point>();
-    private boolean          unTouched = false;
 
     public GestureProcessor()
     {
@@ -32,7 +31,6 @@ public class GestureProcessor implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         startX = screenX;
         startY = screenY;
-        unTouched = false;
         movementPath.clear();
         return false;
     }
@@ -64,13 +62,7 @@ public class GestureProcessor implements InputProcessor {
         }else
             gestureListener.onClick(endX,endY);
 
-        unTouched = true;
-
         return false;
-    }
-
-    public boolean isUnTouched() {
-        return unTouched;
     }
 
     public void setGestureListener(GestureListener gestureListener) {

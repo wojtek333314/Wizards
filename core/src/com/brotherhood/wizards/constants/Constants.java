@@ -6,4 +6,7 @@ package com.brotherhood.wizards.constants;
 public class Constants {
     public static final int APP_WIDTH = 480;//windows
     public static final int APP_HEIGHT = 800;//windows
+    public static final int VIEWPORT_WIDTH = 10;
+    public static final int VIEWPORT_HEIGHT = 20;
+
 }

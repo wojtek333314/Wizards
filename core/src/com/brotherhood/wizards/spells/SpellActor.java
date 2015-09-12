@@ -51,10 +51,15 @@ public class SpellActor extends Actor {
     public void use(PlayerActor playerActor){
         //todo position for playeractor
         Texture texture = new Texture(Gdx.files.internal("tempSkill.png"));
-        Sprite sprite = new Sprite(texture, -24,-20, 24, 20);
-        body.setUserData(new BodyData(sprite));
+        Sprite sprite = new Sprite(texture, 0,0, 24, 20);
+
+        BodyData bodyData = new BodyData(sprite);
+        bodyData.setEnumType(properties.getSpellType());
+        body.setUserData(bodyData);
+
+        sprite.setOrigin(sprite.getWidth()/2,sprite.getHeight()/2);
         body.setTransform(playerActor.getBody().getPosition().x + playerActor.getWidth() / 2
-                , playerActor.getBody().getPosition().y + playerActor.getBodyHeight() + bodyHeight*2
+                , playerActor.getBody().getPosition().y + playerActor.getBodyHeight() + bodyHeight*4
                 ,0);
         body.applyLinearImpulse(new Vector2(0, properties.getSpeed()), body.getWorldCenter(), true);
     }

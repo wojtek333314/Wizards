@@ -7,9 +7,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.brotherhood.wizards.constants.Constants;
 import com.brotherhood.wizards.enums.PlayerType;
 import com.brotherhood.wizards.spells.SpellActor;
-import com.brotherhood.wizards.stages.GameStage;
+import com.brotherhood.wizards.utils.BodyData;
 
 /**
  * Created by Wojtek on 2015-08-25.
@@ -43,7 +44,7 @@ public class PlayerActor extends Actor
         switch(playerType)
         {
             case PLAYER_1:
-                bodyX = 2;
+                bodyX = 3;
                 bodyY = 0.5f;
                 bodyWidth = 0.5f;
                 bodyHeight = 0.5f;
@@ -52,7 +53,7 @@ public class PlayerActor extends Actor
                 bodyWidth = 0.5f;
                 bodyHeight = 0.5f;
                 bodyX = 3;
-                bodyY = GameStage.VIEWPORT_HEIGHT - bodyHeight;
+                bodyY = Constants.VIEWPORT_HEIGHT - bodyHeight;
                 break;
             case OPPONENT_1:
                     //todo
@@ -70,6 +71,10 @@ public class PlayerActor extends Actor
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(bodyWidth, bodyHeight);
         Body body = worldHandle.createBody(bodyDef);
+
+        BodyData bodyData = new BodyData(null);//todo sprite
+        bodyData.setEnumType(playerType);
+        body.setUserData(bodyData);
         body.createFixture(shape, density);
         body.setLinearDamping(friction);
         body.getFixtureList().get(0).setFriction(friction);
@@ -89,13 +94,11 @@ public class PlayerActor extends Actor
     public void jumpLeft(float swipeWayX)
     {
         impulsePower = ((-swipeWayX/ Gdx.graphics.getWidth()) * 2f);
-        body.setLinearVelocity(0,0);
+        body.setLinearVelocity(0, 0);
         body.applyLinearImpulse(new Vector2(-impulsePower, 0), body.getWorldCenter(), true);
     }
 
     public void simpleAttack(){
-        System.out.println(playerProperties);
-        System.out.println(playerProperties.getSpellBook());
         new SpellActor(playerProperties.getAttackSpell(),worldHandle).use(this);
     }
 

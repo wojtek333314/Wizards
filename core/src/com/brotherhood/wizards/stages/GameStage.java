@@ -14,7 +14,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.brotherhood.wizards.constants.Constants;
 import com.brotherhood.wizards.enums.PlayerType;
+import com.brotherhood.wizards.particles.ParticleSystem;
 import com.brotherhood.wizards.player.PlayerActor;
 import com.brotherhood.wizards.processing.BodyContactProcessor;
 import com.brotherhood.wizards.processing.GestureProcessor;
@@ -25,8 +27,6 @@ import com.brotherhood.wizards.utils.BodyData;
  */
 public class GameStage extends Stage
 {
-    public static final int VIEWPORT_WIDTH = 10;
-    public static final int VIEWPORT_HEIGHT = 20;
     private final float TIME_STEP = 1 / 300f;
     private float accumulator = 0f;
 
@@ -41,6 +41,7 @@ public class GameStage extends Stage
     private PlayerActor player1;
     private PlayerActor player2;
     private SpriteBatch stageBatch;
+    private ParticleSystem particleSystem;
 
     public GameStage(String playerNick,String opponentNick) {
         setUpGestureProcessor();
@@ -54,6 +55,7 @@ public class GameStage extends Stage
         setUpContactProcessor();
         shapeRenderer = new ShapeRenderer();
         stageBatch = new SpriteBatch();
+        particleSystem = new ParticleSystem(stageBatch);
     }
 
     /** Obsluga dotyku i gestow dla sceny */
@@ -94,6 +96,7 @@ public class GameStage extends Stage
             @Override
             public void onClick(float x, float y) {
                 System.out.println("CLICK:" + x + ":" + y);
+                particleSystem.createExplosionEffect(x,y);
             }
 
         });
@@ -117,17 +120,17 @@ public class GameStage extends Stage
         bodyDefLeft.position.set(new Vector2(0,0));
         Body bodyLeft = world.createBody(bodyDefLeft);
         PolygonShape shapeLeft = new PolygonShape();
-        shapeLeft.setAsBox(0,VIEWPORT_HEIGHT);
+        shapeLeft.setAsBox(0,Constants.VIEWPORT_HEIGHT);
         bodyLeft.createFixture(shapeLeft, 0);
         shapeLeft.dispose();
 
         //right wall
 
         BodyDef bodyDefRight = new BodyDef();
-        bodyDefRight.position.set(new Vector2(VIEWPORT_WIDTH+.01f,0));
+        bodyDefRight.position.set(new Vector2(Constants.VIEWPORT_WIDTH+.01f,0));
         Body bodyRight = world.createBody(bodyDefRight);
         PolygonShape shapeRight = new PolygonShape();
-        shapeRight.setAsBox(0,VIEWPORT_HEIGHT);
+        shapeRight.setAsBox(0,Constants.VIEWPORT_HEIGHT);
         bodyRight.createFixture(shapeRight, 0);
         shapeRight.dispose();
     }
@@ -135,6 +138,7 @@ public class GameStage extends Stage
     private void setUpContactProcessor()
     {
         bodyContactProcessor = new BodyContactProcessor();
+        world.setContactFilter(bodyContactProcessor);
         world.setContactListener(bodyContactProcessor);
     }
 
@@ -157,7 +161,7 @@ public class GameStage extends Stage
     }
 
     private void setupCamera() {
-        camera = new OrthographicCamera(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        camera = new OrthographicCamera(Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
         camera.update();
     }
@@ -179,16 +183,33 @@ public class GameStage extends Stage
         world.getBodies(bodies);
         stageBatch.begin();
         for(int i=0;i<bodies.size;i++){
+            if(bodies.get(i).getUserData() == null)
+                continue;
+            //rysowanie spritow na body wg ich BodyData
             if((bodies.get(i).getUserData())!=null && ((BodyData) bodies.get(i).getUserData()).getSprite()!=null){
                 Vector3 positionBodyPixels = camera.project(new Vector3(
                             bodies.get(i).getPosition().x,
                             bodies.get(i).getPosition().y,
                             0
                 ));
+
+                if(bodies.get(i).getPosition().y > Constants.VIEWPORT_HEIGHT
+                        || bodies.get(i).getPosition().y < 0)
+                    ((BodyData) bodies.get(i).getUserData()).setToDelete(true);
                 ((BodyData) bodies.get(i).getUserData()).getSprite().setPosition(positionBodyPixels.x,positionBodyPixels.y);
                 ((BodyData) bodies.get(i).getUserData()).getSprite().draw(stageBatch);
             }
+
+            //usuwanie cial do tego przeznaczonych:
+            if(((BodyData) bodies.get(i).getUserData()).isToDelete()){
+                world.destroyBody(bodies.get(i));
+                bodies.get(i).setUserData(null);
+                bodies.removeIndex(i);
+            }
+
         }
+
+        particleSystem.drawEffects(accumulator);
         stageBatch.end();
         renderer.render(world, camera.combined);
     }

@@ -9,7 +9,10 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.brotherhood.wizards.enums.PlayerType;
 import com.brotherhood.wizards.enums.SpellType;
+import com.brotherhood.wizards.particles.ParticleSystem;
 import com.brotherhood.wizards.utils.BodyData;
+
+import java.util.Random;
 
 /**
  * Created by Wojtek on 2015-08-26.
@@ -17,6 +20,11 @@ import com.brotherhood.wizards.utils.BodyData;
  * Dla scian dziala poki co :)
  */
 public class BodyContactProcessor implements ContactFilter,ContactListener {
+    private ParticleSystem  particleSystem;
+
+    public BodyContactProcessor(ParticleSystem particleSystem) {
+        this.particleSystem = particleSystem;
+    }
 
     @Override
     public void beginContact(Contact contact) {
@@ -37,9 +45,17 @@ public class BodyContactProcessor implements ContactFilter,ContactListener {
 
     private void playerSpellReact(Body a,Body b){
         if(((BodyData) a.getUserData()).getEnumType().equals(SpellType.class))
+        {
+            particleSystem.createExplosionEffect(a.getPosition()
+                    ,new float[]{new Random().nextFloat(),new Random().nextFloat(),new Random().nextFloat()});
             ((BodyData) a.getUserData()).setToDelete(true);
+        }
         else
+        {
+            particleSystem.createExplosionEffect(b.getPosition()
+                    ,new float[]{new Random().nextFloat(),new Random().nextFloat(),new Random().nextFloat()});
             ((BodyData) b.getUserData()).setToDelete(true);
+        }
     }
 
     @Override

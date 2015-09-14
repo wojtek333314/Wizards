@@ -21,6 +21,7 @@ import com.brotherhood.wizards.player.PlayerActor;
 import com.brotherhood.wizards.processing.BodyContactProcessor;
 import com.brotherhood.wizards.processing.GestureProcessor;
 import com.brotherhood.wizards.utils.BodyData;
+import com.brotherhood.wizards.utils.UnitsHelper;
 
 /**
  * Created by Wojtek on 2015-08-25.
@@ -47,15 +48,15 @@ public class GameStage extends Stage
         setUpGestureProcessor();
         world = new World(new Vector2(0,0), true);
         renderer = new Box2DDebugRenderer();
+        stageBatch = new SpriteBatch();
+        particleSystem = new ParticleSystem(stageBatch);
+        shapeRenderer = new ShapeRenderer();
 
         createWalls();
         setUpPlayer1(playerNick);
         setUpPlayer2(opponentNick);
         setupCamera();
         setUpContactProcessor();
-        shapeRenderer = new ShapeRenderer();
-        stageBatch = new SpriteBatch();
-        particleSystem = new ParticleSystem(stageBatch);
     }
 
     /** Obsluga dotyku i gestow dla sceny */
@@ -137,7 +138,7 @@ public class GameStage extends Stage
 
     private void setUpContactProcessor()
     {
-        bodyContactProcessor = new BodyContactProcessor();
+        bodyContactProcessor = new BodyContactProcessor(particleSystem);
         world.setContactFilter(bodyContactProcessor);
         world.setContactListener(bodyContactProcessor);
     }
@@ -164,6 +165,7 @@ public class GameStage extends Stage
         camera = new OrthographicCamera(Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
         camera.update();
+        UnitsHelper.worldCamera = camera;
     }
 
     @Override

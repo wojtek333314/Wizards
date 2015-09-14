@@ -3,7 +3,7 @@ package com.brotherhood.wizards.scenes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.brotherhood.wizards.stages.GameStage;
+import com.brotherhood.wizards.gameStages.GameStage;
 
 /**
  * Created by Wojtek on 2015-08-25.

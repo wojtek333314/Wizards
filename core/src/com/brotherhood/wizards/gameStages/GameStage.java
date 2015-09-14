@@ -1,4 +1,4 @@
-package com.brotherhood.wizards.stages;
+package com.brotherhood.wizards.gameStages;
 
 
 import com.badlogic.gdx.Gdx;
